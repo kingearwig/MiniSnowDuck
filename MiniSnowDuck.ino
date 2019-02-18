@@ -1,82 +1,69 @@
 #include <Adafruit_NeoPixel.h>
-#define TailPIN 5
-#define RWingPIN 4
-#define LWingPIN 2
-#define FusePIN 7
+#define TailPIN D2
+#define RWingPIN D1
+#define LWingPIN D3
 #define TailLEDcount 9
 #define RWingLEDcount 2
 #define LWingLEDcount 2
-#define FuseLEDcount 7
-#define BRIGHTNESS 255
+
 Adafruit_NeoPixel Tail = Adafruit_NeoPixel(TailLEDcount, TailPIN, NEO_GRBW + NEO_KHZ800);
 Adafruit_NeoPixel RWing = Adafruit_NeoPixel(RWingLEDcount, RWingPIN, NEO_GRBW + NEO_KHZ800);
 Adafruit_NeoPixel LWing = Adafruit_NeoPixel(LWingLEDcount, LWingPIN, NEO_GRBW + NEO_KHZ800);
-Adafruit_NeoPixel Fuse = Adafruit_NeoPixel(FuseLEDcount, FusePIN, NEO_GRBW + NEO_KHZ800);
 
+int brightness=10;
 unsigned long NOW=millis();
 unsigned long LAST=millis();
 unsigned long interval=1000;
-unsigned long strobelength=1;
-bool flashed=0;
+unsigned long strobelength=50;
+bool strobestate=1;
 void setup() {
   // put your setup code here, to run once:
-  Tail.setBrightness(BRIGHTNESS);
-  Tail.begin();
-  Tail.show(); // Initialize all pixels to 'off'
-  RWing.setBrightness(BRIGHTNESS);
+  Serial.begin(115200);
   RWing.begin();
-  RWing.show(); // Initialize all pixels to 'off'
-  LWing.setBrightness(BRIGHTNESS);
   LWing.begin();
-  LWing.show(); // Initialize all pixels to 'off'
-  Fuse.setBrightness(BRIGHTNESS);
-  Fuse.begin();
-  Fuse.show(); // Initialize all pixels to 'off'
-  Nav();
+  Tail.begin();
+  RWing.setPixelColor(1,255,255,255,255);
+  RWing.setPixelColor(0,0,255,0,0);
+  LWing.setPixelColor(1,255,255,255,255);
+  LWing.setPixelColor(0,255,0,0,0);
+  RWing.setBrightness(brightness);
+  RWing.show();
+  LWing.setBrightness(brightness);
+  LWing.show();
+  
+  for(int i=0;i<TailLEDcount;i++){
+    Tail.setPixelColor(i,255,255,255,255);
+  }
+  Tail.setBrightness(brightness);
+  Tail.show();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   NOW=millis();
-  Strobe();
-  Nav();
+  strobe();
 }
 
-
-//--------------------------------------
-void Strobe(){
-  if(!flashed){
-    if(NOW-LAST>=interval){
-      for(int x=0;x<TailLEDcount;x++){
-        Tail.setPixelColor(x,255,255,255,255);
+void strobe(){
+  if(!strobestate){
+    if(NOW-LAST>interval){
+      LAST=millis();
+      strobestate=1;
+      for(int i=0;i<TailLEDcount;i++){
+        Tail.setPixelColor(i,255,255,255,255);
       }
       Tail.show();
-      Tail.setBrightness(0);
-      Tail.show();
-      Tail.setBrightness(BRIGHTNESS);
-      LAST=millis();flashed=1;
-    }
+    } 
   }
-  else{
-    if(NOW-LAST>=interval/6){
-      for(int x=0;x<TailLEDcount;x++){
-        Tail.setPixelColor(x,255,255,255,255);
+  if(strobestate){
+    if(NOW-LAST>strobelength){
+      LAST=millis();
+      strobestate=0;
+      for(int i=0;i<TailLEDcount;i++){
+        Tail.setPixelColor(i,0,0,0,0);
       }
       Tail.show();
-      Tail.setBrightness(0);
-      Tail.show();
-      Tail.setBrightness(BRIGHTNESS);
-      LAST=millis();flashed=0;
     }
   }
-}
-//--------------------------------------
-void Nav(){
-  RWing.setPixelColor(1,255,255,255,255);
-  RWing.setPixelColor(0,0,255,0,0);
-  LWing.setPixelColor(1,255,255,255,255);
-  LWing.setPixelColor(0,255,0,0,0);
-  RWing.show();
-  LWing.show();
   
 }

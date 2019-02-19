@@ -1,5 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-#include <FastLED.h>
 #define TailPIN D2
 #define RWingPIN D1
 #define LWingPIN D3

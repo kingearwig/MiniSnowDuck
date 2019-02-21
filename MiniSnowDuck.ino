@@ -75,7 +75,7 @@ void solid(){
   for(int i=0;i<TailLEDcount;i++){
     Tail.setPixelColor(i,255,255,255,255);
   }
-  Tail.setBrightness(255);
+  Tail.setBrightness(brightness);
   Tail.show();
 }
 
